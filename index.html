@@ -123,31 +123,57 @@
         }
         .edit-btn-capsula:active { background: rgba(142, 142, 147, 0.25); }
 
-        /* --- CALENDARIO --- */
+        /* --- CALENDARIO PREMIUM REDISEÑADO --- */
         .glass-card {
             background: var(--glass-bg); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%);
-            border: 1px solid var(--glass-border); border-radius: 28px; padding: 22px;
+            border: 1px solid var(--glass-border); border-radius: 32px; padding: 24px 16px;
             margin-bottom: 16px; box-shadow: var(--glass-shadow), var(--glass-inset); position: relative; width: 100%;
         }
-        .calendar-wrapper { width: 100%; overflow: hidden; padding: 16px 12px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 16px; width: 100%; }
-        .day-name { text-align: center; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        .calendar-wrapper { width: 100%; overflow: hidden; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 12px; width: 100%; }
+        
+        .day-name { 
+            text-align: center; font-size: 11px; font-weight: 800; 
+            color: var(--text-secondary); margin-bottom: 8px; 
+            text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6;
+        }
         
         .calendar-day {
-            min-height: 70px; background: rgba(255, 255, 255, 0.5); border-radius: 12px; display: flex; flex-direction: column;
-            padding: 4px 2px; font-size: 12px; font-weight: 500; position: relative; cursor: pointer; overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.8); width: 100%; transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
+            min-height: 75px; 
+            background: rgba(255, 255, 255, 0.4); 
+            border-radius: 14px; 
+            display: flex; flex-direction: column;
+            padding: 6px 0; 
+            cursor: pointer; 
+            /* Importante: overflow visible para que los eventos crucen los días */
+            overflow: visible; 
+            transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
         }
-        .calendar-day:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.9); }
-        .day-num { text-align: center; font-weight: 600; margin-bottom: 4px; z-index: 10; color: var(--text-main); font-size: 13px; }
-        .calendar-day.active-bg { background: #FFFFFF; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border-color: white; }
-        .calendar-day.active-bg .day-num { font-weight: 700; color: var(--cat-blue); }
+        
+        .calendar-day:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.6); }
+        .calendar-day.active-bg { 
+            background: rgba(255, 255, 255, 0.95); 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06), inset 0 1px 1px #fff; 
+        }
+        
+        .day-num { 
+            text-align: center; font-weight: 600; margin-bottom: 6px; 
+            color: var(--text-secondary); font-size: 13px; opacity: 0.7; 
+        }
+        .calendar-day.active-bg .day-num { 
+            font-weight: 800; color: var(--brand); opacity: 1; font-size: 14px;
+        }
 
         .event-bar {
-            height: 14px; line-height: 14px; margin-bottom: 2px; font-size: 8.5px; font-weight: 700; color: white;
-            padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 5;
+            position: relative; z-index: 50; /* Flota sobre el grid */
+            height: 16px; line-height: 16px; margin-bottom: 4px; 
+            font-size: 9px; font-weight: 800; color: white;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+            text-transform: uppercase; letter-spacing: 0.05em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .event-spacer { height: 16px; width: 100%; } 
+        .event-spacer { height: 20px; width: 100%; } 
         
         .busy-bar { background: var(--busy); }
         .cat-blue { background: var(--cat-blue); }
@@ -156,10 +182,21 @@
         .cat-orange { background: var(--cat-orange); }
         .cat-purple { background: var(--cat-purple); }
 
-        .single-day { margin: 0 2px; border-radius: 4px; }
-        .multi-start { margin-left: 2px; margin-right: -4px; padding-right: 4px; border-radius: 4px 0 0 4px; }
-        .multi-mid { margin: 0 -4px; padding: 0 4px; border-radius: 0; color: transparent !important; } 
-        .multi-end { margin-left: -4px; margin-right: 2px; padding-left: 4px; border-radius: 0 4px 4px 0; color: transparent !important; }
+        /* Magia para unir los días continuos (salvando el gap de 6px) */
+        .single-day { margin: 0 4px; border-radius: 6px; padding: 0 6px; }
+        
+        .multi-start { 
+            margin-left: 4px; margin-right: -6px; /* Se expande hacia la derecha */
+            padding-left: 6px; border-radius: 6px 0 0 6px; 
+        }
+        .multi-mid { 
+            margin-left: -6px; margin-right: -6px; /* Se expande por ambos lados */
+            padding: 0 6px; border-radius: 0; color: transparent !important; 
+        }
+        .multi-end { 
+            margin-left: -6px; margin-right: 4px; /* Se expande hacia la izquierda */
+            padding-left: 6px; border-radius: 0 6px 6px 0; color: transparent !important; 
+        }
 
         .category-picker { display: flex; justify-content: space-between; margin-bottom: 20px; background: #F2F2F7; padding: 10px; border-radius: 18px; gap: 4px; }
         .cat-option { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; opacity: 0.4; transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); flex: 1; }
@@ -333,7 +370,13 @@
 
         <section id="calendar" class="view">
             <div class="glass-card calendar-wrapper">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 12px; text-align: center; letter-spacing: -0.02em;">Agosto</h2>
+                
+                <!-- NUEVA CABECERA DE CALENDARIO -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; padding: 0 4px;">
+                    <h2 style="font-size: 26px; font-weight: 900; color: var(--text-main); letter-spacing: -0.03em; margin: 0; line-height: 1;">Agosto</h2>
+                    <span style="font-size: 14px; font-weight: 800; color: var(--brand); background: rgba(213, 67, 19, 0.12); padding: 5px 14px; border-radius: 12px;">2026</span>
+                </div>
+
                 <div class="calendar-grid" id="cal-days-header">
                     <div class="day-name">L</div><div class="day-name">M</div><div class="day-name">X</div>
                     <div class="day-name">J</div><div class="day-name">V</div><div class="day-name">S</div><div class="day-name">D</div>
@@ -758,6 +801,26 @@
             document.getElementById('busy-name').value = ''; document.getElementById('busy-start').value = '';
             document.getElementById('busy-end').value = ''; document.getElementById('busy-reason').value = '';
             document.getElementById('btn-delete-busy').style.display = 'none'; openModal('busy');
+        }
+
+        // FUNCIONES AÑADIDAS PARA EDITAR Y BORRAR AUSENCIAS
+        function openEditBusy(id) {
+            const busy = busyPeriods.find(b => b.id === id); if (!busy) return;
+            document.getElementById('busy-modal-title').innerText = "Editar Ausencia";
+            document.getElementById('busy-id').value = busy.id;
+            document.getElementById('busy-name').value = busy.name;
+            document.getElementById('busy-start').value = busy.start_day;
+            document.getElementById('busy-end').value = busy.end_day;
+            document.getElementById('busy-reason').value = busy.reason || '';
+            document.getElementById('btn-delete-busy').style.display = 'block';
+            openModal('busy');
+        }
+
+        async function deleteBusy() {
+            const id = document.getElementById('busy-id').value;
+            if (id && confirm("¿Seguro que quieres eliminar esta ausencia?")) {
+                await supabaseClient.from('busy_periods').delete().eq('id', id); closeModal(); await init();
+            }
         }
 
         async function saveBusy() {
