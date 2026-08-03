@@ -123,15 +123,21 @@
         }
         .edit-btn-capsula:active { background: rgba(142, 142, 147, 0.25); }
 
-        /* --- CALENDARIO PREMIUM REDISEÑADO --- */
+        /* --- CALENDARIO PREMIUM CORREGIDO --- */
         .glass-card {
             background: var(--glass-bg); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%);
-            border: 1px solid var(--glass-border); border-radius: 32px; padding: 24px 16px;
+            border: 1px solid var(--glass-border); border-radius: 32px; padding: 24px 12px;
             margin-bottom: 16px; box-shadow: var(--glass-shadow), var(--glass-inset); position: relative; width: 100%;
         }
         
-        .calendar-wrapper { width: 100%; overflow: hidden; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 12px; width: 100%; }
+        .calendar-wrapper { width: 100%; overflow: visible; }
+        
+        /* LA LÍNEA MÁGICA: minmax(0, 1fr) fuerza a que las celdas no se rompan por el texto largo */
+        .calendar-grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, minmax(0, 1fr)); 
+            gap: 4px; margin-top: 12px; width: 100%; 
+        }
         
         .day-name { 
             text-align: center; font-size: 11px; font-weight: 800; 
@@ -146,7 +152,6 @@
             display: flex; flex-direction: column;
             padding: 6px 0; 
             cursor: pointer; 
-            /* Importante: overflow visible para que los eventos crucen los días */
             overflow: visible; 
             transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
         }
@@ -166,7 +171,7 @@
         }
 
         .event-bar {
-            position: relative; z-index: 50; /* Flota sobre el grid */
+            position: relative; z-index: 50; 
             height: 16px; line-height: 16px; margin-bottom: 4px; 
             font-size: 9px; font-weight: 800; color: white;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
@@ -182,21 +187,10 @@
         .cat-orange { background: var(--cat-orange); }
         .cat-purple { background: var(--cat-purple); }
 
-        /* Magia para unir los días continuos (salvando el gap de 6px) */
-        .single-day { margin: 0 4px; border-radius: 6px; padding: 0 6px; }
-        
-        .multi-start { 
-            margin-left: 4px; margin-right: -6px; /* Se expande hacia la derecha */
-            padding-left: 6px; border-radius: 6px 0 0 6px; 
-        }
-        .multi-mid { 
-            margin-left: -6px; margin-right: -6px; /* Se expande por ambos lados */
-            padding: 0 6px; border-radius: 0; color: transparent !important; 
-        }
-        .multi-end { 
-            margin-left: -6px; margin-right: 4px; /* Se expande hacia la izquierda */
-            padding-left: 6px; border-radius: 0 6px 6px 0; color: transparent !important; 
-        }
+        .single-day { margin: 0 2px; border-radius: 4px; padding: 0 4px; }
+        .multi-start { margin-left: 2px; margin-right: -4px; padding-left: 4px; border-radius: 4px 0 0 4px; }
+        .multi-mid { margin-left: -4px; margin-right: -4px; padding: 0 4px; border-radius: 0; color: transparent !important; }
+        .multi-end { margin-left: -4px; margin-right: 2px; padding-left: 4px; border-radius: 0 4px 4px 0; color: transparent !important; }
 
         .category-picker { display: flex; justify-content: space-between; margin-bottom: 20px; background: #F2F2F7; padding: 10px; border-radius: 18px; gap: 4px; }
         .cat-option { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; opacity: 0.4; transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); flex: 1; }
@@ -339,7 +333,7 @@
             <span style="font-size: 26px;">🚀</span>
             <div>
                 <strong style="display: block; font-size: 16px; font-weight: 700; color: var(--text-main); letter-spacing: -0.01em;">App actualizada</strong>
-                <span style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.3; display: block; margin-top: 2px;">Hemos aplicado el nuevo diseño premium.</span>
+                <span style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.3; display: block; margin-top: 2px;">Hemos solucionado los errores del calendario.</span>
             </div>
         </div>
         <button onclick="cerrarUpdateToast()" style="background: #E5E5EA; border: none; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer; font-size: 15px; flex-shrink: 0; font-weight: 700; transition: background 0.2s;">✕</button>
@@ -684,11 +678,28 @@
                 const dayHasSomething = daySlots[i].length > 0;
                 let html = `<div class="calendar-day ${dayHasSomething ? 'active-bg' : ''}" onclick="openDayDetails(${i})">`;
                 html += `<div class="day-num">${i}</div>`;
+                
+                // Calculamos en qué columna de la semana cae este día (1=Lunes, 7=Domingo)
+                let col = (i + 4) % 7 + 1; 
+                
                 for(let s = 0; s < daySlots[i].length; s++) {
                     const evt = daySlots[i][s];
                     if(!evt) html += `<div class="event-spacer"></div>`;
                     else {
-                        const visualClass = (i === evt.start_day && i === evt.end_day) ? 'single-day' : (i === evt.start_day) ? 'multi-start' : (i === evt.end_day) ? 'multi-end' : 'multi-mid';
+                        let isStart = (i === evt.start_day);
+                        let isEnd = (i === evt.end_day);
+                        
+                        // Si el evento toca el límite de la semana, forzamos que se vea como inicio/fin 
+                        // para que la píldora no se salga del calendario
+                        let visualStart = isStart || (col === 1);
+                        let visualEnd = isEnd || (col === 7);
+                        
+                        let visualClass = '';
+                        if (visualStart && visualEnd) visualClass = 'single-day';
+                        else if (visualStart) visualClass = 'multi-start';
+                        else if (visualEnd) visualClass = 'multi-end';
+                        else visualClass = 'multi-mid';
+
                         html += `<div class="event-bar ${evt.catClass} ${visualClass}">${evt.label}</div>`;
                     }
                 }
@@ -803,7 +814,6 @@
             document.getElementById('btn-delete-busy').style.display = 'none'; openModal('busy');
         }
 
-        // FUNCIONES AÑADIDAS PARA EDITAR Y BORRAR AUSENCIAS
         function openEditBusy(id) {
             const busy = busyPeriods.find(b => b.id === id); if (!busy) return;
             document.getElementById('busy-modal-title').innerText = "Editar Ausencia";
@@ -886,7 +896,7 @@
         }
 
         /* --- CONTROL DE ACTUALIZACIONES --- */
-        const APP_VERSION = "1.0"; 
+        const APP_VERSION = "1.2"; 
 
         function checkUpdate() {
             const versionGuardada = localStorage.getItem('oasis_version');
